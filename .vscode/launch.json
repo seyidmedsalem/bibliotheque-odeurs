@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Backend FastAPI (sans MQTT, SQLite)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"],
+      "cwd": "${workspaceFolder}/backend",
+      "env": { "MQTT_ENABLED": "false" },
+      "jinja": true
+    },
+    {
+      "name": "Backend FastAPI (avec MQTT local)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"],
+      "cwd": "${workspaceFolder}/backend",
+      "env": { "MQTT_HOST": "localhost", "MQTT_USER": "nez", "MQTT_PASSWORD": "change-moi" }
+    },
+    {
+      "name": "Simulateur : entraîner le modèle",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/simulator/simulate.py",
+      "args": ["train"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Simulateur : mesures en direct",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/simulator/simulate.py",
+      "args": ["live"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

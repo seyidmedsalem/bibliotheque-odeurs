@@ -1,0 +1,69 @@
+# Lancement complet : docker compose up -d --build
+# Interface web : http://localhost:8080 · API + Swagger : http://localhost:8000/docs
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.20
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    environment:
+      MQTT_USER: ${MQTT_USER:-nez}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-change-moi}
+    # Crée le fichier de mots de passe au démarrage puis lance le broker
+    command: >
+      sh -c "touch /mosquitto/config/passwd &&
+             chmod 0700 /mosquitto/config/passwd &&
+             mosquitto_passwd -b /mosquitto/config/passwd $$MQTT_USER $$MQTT_PASSWORD &&
+             exec mosquitto -c /mosquitto/config/mosquitto.conf"
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+
+  db:
+    image: timescale/timescaledb-ha:pg16.6-ts2.17.2-all
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nez
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-nez-password}
+      POSTGRES_DB: nez
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/home/postgres/pgdata/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nez -d nez"]
+      interval: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://nez:${DB_PASSWORD:-nez-password}@db:5432/nez
+      MQTT_HOST: mosquitto
+      MODEL_PATH: /data/model.joblib
+    ports:
+      - "8000:8000"
+    volumes:
+      - model-data:/data
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"   # interface web : http://localhost:8080
+
+volumes:
+  mosquitto-data:
+  db-data:
+  model-data:

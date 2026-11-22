@@ -1,0 +1,42 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Installer le backend (venv)",
+      "type": "shell",
+      "command": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      }
+    },
+    {
+      "label": "Tests backend",
+      "type": "shell",
+      "command": ".venv/bin/python -m pytest -q",
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "group": "test"
+    },
+    {
+      "label": "Interface web (dev)",
+      "type": "shell",
+      "command": "npm install && npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/web"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker : tout lancer",
+      "type": "shell",
+      "command": "docker compose up -d --build"
+    },
+    {
+      "label": "Ouvrir l'app iOS dans Xcode",
+      "type": "shell",
+      "command": "open ios/NezApp.xcodeproj"
+    }
+  ]
+}

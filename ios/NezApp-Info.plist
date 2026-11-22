@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Autorise HTTP (sans TLS) vers le serveur local : localhost, IP du réseau maison, Raspberry Pi -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<!-- Adresse du serveur proposée par défaut (réglage NEZ_DEFAULT_SERVER dans Xcode → Build Settings) -->
+	<key>NezDefaultServer</key>
+	<string>$(NEZ_DEFAULT_SERVER)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Votre position sert à placer vos nez électroniques et leurs odeurs sur la carte olfactive réelle.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>L'application se connecte au serveur du nez électronique sur votre réseau local.</string>
+</dict>
+</plist>
