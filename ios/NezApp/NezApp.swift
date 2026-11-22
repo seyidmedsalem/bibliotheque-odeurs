@@ -16,8 +16,7 @@ struct NezApp: App {
                 }
             }
             .environment(store)
-            .preferredColorScheme(.dark)
-            .tint(Theme.gold)
+            .tint(.indigo)
             .task { await store.start() }
         }
     }
@@ -32,7 +31,7 @@ struct RootView: View {
             DashboardView()
                 .tabItem { Label("Direct", systemImage: "waveform.path.ecg") }
             LearnView()
-                .tabItem { Label("Apprendre", systemImage: "brain.head.profile") }
+                .tabItem { Label("Apprendre", systemImage: "brain") }
             LibraryView()
                 .tabItem { Label("Bibliothèque", systemImage: "books.vertical") }
             OdorMapView()
@@ -60,18 +59,19 @@ struct AlertBanner: View {
     var body: some View {
         if let alert = store.banner {
             HStack(alignment: .top, spacing: 12) {
-                GlowDot(color: Theme.level(alert.level), size: 12).padding(.top, 4)
+                Image(systemName: Theme.levelIcon(alert.level))
+                    .font(.title3)
+                    .foregroundStyle(Theme.level(alert.level))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(alert.title).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.ink)
-                    Text(alert.message).font(.system(size: 13)).foregroundStyle(Theme.muted).lineLimit(2)
+                    Text(alert.title).font(.subheadline.weight(.semibold))
+                    Text(alert.message).font(.footnote).foregroundStyle(.secondary).lineLimit(2)
                 }
-                Spacer()
+                Spacer(minLength: 0)
             }
             .padding(14)
-            .background(RoundedRectangle(cornerRadius: 18).fill(Theme.bg.opacity(0.95)))
-            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.level(alert.level).opacity(0.7)))
-            .shadow(color: Theme.level(alert.level).opacity(0.4), radius: 16)
-            .padding(.horizontal, 16)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
+            .padding(.horizontal, 12)
             .transition(.move(edge: .top).combined(with: .opacity))
             .onTapGesture { store.banner = nil }
             .task(id: alert.id) {

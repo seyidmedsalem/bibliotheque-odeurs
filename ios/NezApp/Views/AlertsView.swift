@@ -8,63 +8,65 @@ struct AlertsView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                GlowBackground(colors: [Theme.ember, Theme.rose, Theme.lilac])
-                ScrollView {
-                    VStack(spacing: 14) {
-                        HStack(alignment: .bottom) {
-                            PageHeader(kicker: "\(store.unreadAlerts) non lues", title: "Alertes", color: Theme.ember)
-                            if store.unreadAlerts > 0 {
-                                Button("Tout lire") { Task { await store.acknowledgeAll() } }
-                                    .buttonStyle(GhostButtonStyle(color: Theme.gold))
-                            }
-                        }
-                        Picker("Filtre", selection: $onlyUnread) {
-                            Text("Toutes").tag(false)
-                            Text("Non lues").tag(true)
-                        }
-                        .pickerStyle(.segmented)
-
-                        if items.isEmpty {
-                            EmptyState(icon: "bell.slash", title: "Rien à signaler",
-                                       message: "Les fuites de gaz, aliments qui se gâtent et odeurs suspectes apparaîtront ici.")
-                        }
-                        ForEach(items) { alert in AlertRow(alert: alert) }
-
-                        Text("⚠️ Ce système ne remplace pas un détecteur de gaz ou de CO certifié.")
-                            .font(.system(size: 11)).foregroundStyle(Theme.muted).padding(.top, 8)
+            List {
+                Section {
+                    Picker("Afficher", selection: $onlyUnread) {
+                        Text("Toutes").tag(false)
+                        Text("Non lues").tag(true)
                     }
-                    .padding(20)
+                    .pickerStyle(.segmented)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
                 }
-                .refreshable { await store.loadAlerts() }
+                Section {
+                    ForEach(items) { alert in
+                        AlertRow(alert: alert)
+                            .swipeActions {
+                                if !alert.acknowledged {
+                                    Button("Lue") { Task { await store.acknowledge(alert) } }.tint(.indigo)
+                                }
+                            }
+                    }
+                } footer: {
+                    Text("Glissez une alerte vers la gauche pour la marquer comme lue. Ce système ne remplace pas un détecteur de gaz certifié.")
+                }
             }
+            .overlay {
+                if items.isEmpty {
+                    ContentUnavailableView("Rien à signaler", systemImage: "bell.slash",
+                                           description: Text("Les fuites de gaz et les odeurs suspectes apparaîtront ici."))
+                }
+            }
+            .navigationTitle("Alertes")
+            .toolbar {
+                if store.unreadAlerts > 0 {
+                    Button("Tout lire") { Task { await store.acknowledgeAll() } }
+                }
+            }
+            .refreshable { await store.loadAlerts() }
         }
     }
 }
 
 struct AlertRow: View {
-    @Environment(AppStore.self) private var store
     let alert: AlertItem
 
     var body: some View {
-        let color = Theme.level(alert.level)
-        HStack(alignment: .top, spacing: 14) {
-            RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 4).shadow(color: color, radius: 4)
-            VStack(alignment: .leading, spacing: 6) {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: Theme.levelIcon(alert.level))
+                .font(.title3)
+                .foregroundStyle(Theme.level(alert.level))
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 3) {
                 HStack {
-                    LevelBadge(level: alert.level)
+                    Text(alert.title).font(.body.weight(alert.acknowledged ? .regular : .semibold))
                     Spacer()
-                    Text(alert.ts.relative).font(.system(size: 11)).foregroundStyle(Theme.muted)
+                    if !alert.acknowledged { Circle().fill(.indigo).frame(width: 8, height: 8) }
                 }
-                Text(alert.title).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.ink)
-                Text(alert.message).font(.system(size: 13)).foregroundStyle(Theme.muted)
-                if !alert.acknowledged {
-                    Button("Marquer comme lue") { Task { await store.acknowledge(alert) } }
-                        .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.gold).padding(.top, 2)
-                }
+                Text(alert.message).font(.subheadline).foregroundStyle(.secondary)
+                Text(alert.ts.relative).font(.caption).foregroundStyle(.tertiary)
             }
         }
-        .glass(padding: 14)
-        .opacity(alert.acknowledged ? 0.55 : 1)
+        .padding(.vertical, 4)
     }
 }

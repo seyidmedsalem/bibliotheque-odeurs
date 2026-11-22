@@ -73,8 +73,8 @@ struct OdorMapView: View {
                     ForEach(store.devices.filter { $0.lat != nil && $0.lon != nil }) { dev in
                         Annotation(dev.name, coordinate: CLLocationCoordinate2D(latitude: dev.lat!, longitude: dev.lon!), anchor: .top) {
                             Image(systemName: store.followDeviceId == dev.id ? "figure.walk" : "sensor.fill")
-                                .font(.system(size: 10)).foregroundStyle(Theme.bg)
-                                .padding(5).background(Circle().fill(dev.online ? Theme.mint : Theme.muted))
+                                .font(.system(size: 10)).foregroundStyle(Color.white)
+                                .padding(5).background(Circle().fill(dev.online ? Color.green : Color.secondary))
                                 .offset(y: 18)
                         }
                         .annotationTitles(.hidden)
@@ -112,7 +112,7 @@ struct OdorMapView: View {
     private var header: some View {
         VStack(spacing: 8) {
             HStack {
-                Text("Carte olfactive").font(.display(24)).foregroundStyle(Theme.ink)
+                Text("Carte olfactive").font(.title3.bold())
                 Spacer()
                 Menu {
                     Picker("Vue", selection: $look) { ForEach(MapLook.allCases) { Text($0.rawValue).tag($0) } }
@@ -123,14 +123,14 @@ struct OdorMapView: View {
                     }
                 } label: {
                     Label("\(look.rawValue) · \(hours == 24 ? "24 h" : hours == 24 * 7 ? "7 j" : "30 j")", systemImage: "slider.horizontal.3")
-                        .font(.system(size: 12, weight: .medium)).foregroundStyle(Theme.ink)
+                        .font(.system(size: 12, weight: .medium)).foregroundStyle(Color.primary)
                         .padding(.horizontal, 10).padding(.vertical, 7)
-                        .background(Capsule().fill(Color.white.opacity(0.1)))
+                        .background(Capsule().fill(Color.secondary.opacity(0.15)))
                 }
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    chip("Toutes", color: Theme.gold, active: odorFilter == nil) { odorFilter = nil }
+                    chip("Toutes", color: Color.indigo, active: odorFilter == nil) { odorFilter = nil }
                     ForEach(store.odors.filter { !$0.isAir }) { o in
                         chip("\(o.icon) \(o.name)", color: Color(hex: o.color), active: odorFilter == o.id) { odorFilter = o.id }
                     }
@@ -138,17 +138,16 @@ struct OdorMapView: View {
             }
         }
         .padding(12)
-        .background(RoundedRectangle(cornerRadius: 20).fill(Theme.bg.opacity(0.85)))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Theme.hair))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func chip(_ text: String, color: Color, active: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(text)
                 .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(active ? Theme.bg : Theme.ink)
+                .foregroundStyle(active ? Color.white : Color.primary)
                 .padding(.horizontal, 12).padding(.vertical, 7)
-                .background(Capsule().fill(active ? color : Color.white.opacity(0.08)))
+                .background(Capsule().fill(active ? color : Color.secondary.opacity(0.15)))
         }
     }
 
@@ -157,14 +156,13 @@ struct OdorMapView: View {
             ForEach(unplaced) { d in Button("Placer « \(d.name) »") { placing = d } }
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: "mappin.slash").foregroundStyle(Theme.ember)
+                Image(systemName: "mappin.slash").foregroundStyle(Color.orange)
                 Text("\(unplaced.count) appareil(s) sans position réelle. Touchez pour les placer.")
-                    .font(.system(size: 12)).foregroundStyle(Theme.ink).multilineTextAlignment(.leading)
+                    .font(.system(size: 12)).foregroundStyle(Color.primary).multilineTextAlignment(.leading)
                 Spacer()
             }
             .padding(12)
-            .background(RoundedRectangle(cornerRadius: 16).fill(Theme.bg.opacity(0.88)))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.ember.opacity(0.5)))
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
 
@@ -173,13 +171,13 @@ struct OdorMapView: View {
     private var roomsCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Kicker("Par lieu", color: Theme.gold)
+                Text("Par lieu").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
                 Spacer()
-                Text("\(located.count) détections · \(spots.count) lieux").font(.system(size: 12)).foregroundStyle(Theme.muted)
+                Text("\(located.count) détections · \(spots.count) lieux").font(.system(size: 12)).foregroundStyle(Color.secondary)
             }
             if spots.isEmpty {
                 Text("Aucune détection géolocalisée sur cette période. Placez vos appareils à leur vraie position (bouton ci-dessus ou Réglages).")
-                    .font(.system(size: 13)).foregroundStyle(Theme.muted)
+                    .font(.system(size: 13)).foregroundStyle(Color.secondary)
             } else {
                 ForEach(spots.sorted { $0.detections.count > $1.detections.count }.prefix(4)) { spot in
                     let top = store.odor(spot.counts.first?.odorId ?? nil)
@@ -188,47 +186,45 @@ struct OdorMapView: View {
                         withAnimation { position = .camera(MapCamera(centerCoordinate: spot.coordinate, distance: 400, pitch: 50)) }
                     } label: {
                         HStack {
-                            Text(spot.room ?? "Lieu sans nom").font(.system(size: 14, weight: .medium)).foregroundStyle(Theme.ink)
+                            Text(spot.room ?? "Lieu sans nom").font(.system(size: 14, weight: .medium)).foregroundStyle(Color.primary)
                             Spacer()
                             Text("\(top?.icon ?? "") \(top?.name ?? "")").font(.system(size: 12))
                                 .foregroundStyle(Color(hex: top?.color ?? "#A79FB5"))
                             Text("\(spot.detections.count)").font(.system(size: 13).monospacedDigit())
-                                .foregroundStyle(Theme.muted).frame(width: 34, alignment: .trailing)
+                                .foregroundStyle(Color.secondary).frame(width: 34, alignment: .trailing)
                         }
                     }
                 }
             }
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 20).fill(Theme.bg.opacity(0.88)))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Theme.hair))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func detail(_ spot: OdorSpot) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(spot.room ?? "Lieu").font(.display(24)).foregroundStyle(Theme.ink)
+                    Text(spot.room ?? "Lieu").font(.title3.bold()).foregroundStyle(Color.primary)
                     Text(String(format: "%.5f, %.5f", spot.coordinate.latitude, spot.coordinate.longitude))
-                        .font(.system(size: 11).monospacedDigit()).foregroundStyle(Theme.muted)
+                        .font(.system(size: 11).monospacedDigit()).foregroundStyle(Color.secondary)
                 }
                 Spacer()
-                Button { selection = nil } label: { Image(systemName: "xmark.circle.fill").font(.system(size: 22)).foregroundStyle(Theme.muted) }
+                Button { selection = nil } label: { Image(systemName: "xmark.circle.fill").font(.system(size: 22)).foregroundStyle(Color.secondary) }
             }
             ForEach(spot.counts.prefix(4), id: \.odorId) { item in
                 let odor = store.odor(item.odorId)
-                ProbabilityBar(label: "\(odor?.icon ?? "❔") \(odor?.name ?? "Inconnue")",
+                ProbabilityRow(label: "\(odor?.icon ?? "❔") \(odor?.name ?? "Inconnue")",
                                value: Double(item.count) / Double(spot.detections.count),
                                color: Color(hex: odor?.color ?? "#8A8494"))
             }
             if let last = spot.detections.first {
                 Text("Dernière : \(last.label) \(last.ts.relative) · \(Int(last.confidence * 100)) %")
-                    .font(.system(size: 12)).foregroundStyle(Theme.muted)
+                    .font(.system(size: 12)).foregroundStyle(Color.secondary)
             }
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: 20).fill(Theme.bg.opacity(0.92)))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Theme.gold.opacity(0.5)))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -244,12 +240,12 @@ struct SpotBubble: View {
         ZStack(alignment: .topTrailing) {
             Text(top?.icon ?? "❔").font(.system(size: selected ? 24 : 18))
                 .padding(selected ? 9 : 7)
-                .background(Circle().fill(Theme.bg.opacity(0.9)))
+                .background(Circle().fill(Color(.systemBackground)))
                 .overlay(Circle().stroke(color, lineWidth: 2))
                 .shadow(color: color, radius: 8)
             if spot.detections.count > 1 {
                 Text("\(spot.detections.count)")
-                    .font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.bg)
+                    .font(.system(size: 10, weight: .bold)).foregroundStyle(Color.white)
                     .padding(.horizontal, 5).padding(.vertical, 2)
                     .background(Capsule().fill(color))
                     .offset(x: 8, y: -6)
@@ -279,8 +275,8 @@ struct PlaceDeviceView: View {
                         UserAnnotation()
                         if let coordinate {
                             Annotation(device.name, coordinate: coordinate) {
-                                Image(systemName: "sensor.fill").foregroundStyle(Theme.bg)
-                                    .padding(8).background(Circle().fill(Theme.mint)).shadow(color: Theme.mint, radius: 8)
+                                Image(systemName: "sensor.fill").foregroundStyle(Color.white)
+                                    .padding(8).background(Circle().fill(Color.green)).shadow(color: Color.green, radius: 8)
                             }
                         }
                     }
@@ -293,7 +289,7 @@ struct PlaceDeviceView: View {
 
                 VStack(alignment: .leading, spacing: 14) {
                     Text("Touchez la carte à l'endroit exact où se trouve le nez, ou utilisez le GPS du téléphone en étant à côté.")
-                        .font(.system(size: 13)).foregroundStyle(Theme.muted)
+                        .font(.system(size: 13)).foregroundStyle(Color.secondary)
                     Button {
                         Task {
                             locating = true
@@ -306,14 +302,14 @@ struct PlaceDeviceView: View {
                     } label: {
                         Label(locating ? "Recherche du GPS…" : "Utiliser ma position actuelle", systemImage: "location.fill")
                     }
-                    .buttonStyle(GhostButtonStyle(color: Theme.sky))
+                    .buttonStyle(.bordered)
                     if store.location.denied {
                         Text("Localisation refusée : Réglages → Confidentialité → Service de localisation → Nez.")
-                            .font(.system(size: 12)).foregroundStyle(Theme.ember)
+                            .font(.system(size: 12)).foregroundStyle(Color.orange)
                     }
                     Toggle("Déplacer aussi ses anciennes détections", isOn: $moveHistory).font(.system(size: 14))
                     if let c = coordinate {
-                        Text(String(format: "%.6f, %.6f", c.latitude, c.longitude)).font(.system(size: 12).monospacedDigit()).foregroundStyle(Theme.muted)
+                        Text(String(format: "%.6f, %.6f", c.latitude, c.longitude)).font(.system(size: 12).monospacedDigit()).foregroundStyle(Color.secondary)
                     }
                     Button("Enregistrer la position") {
                         guard let c = coordinate else { return }
@@ -324,12 +320,13 @@ struct PlaceDeviceView: View {
                             dismiss()
                         }
                     }
-                    .buttonStyle(PrimaryButtonStyle(color: Theme.mint))
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
                     .disabled(coordinate == nil || saving)
                     .opacity(coordinate == nil ? 0.5 : 1)
                 }
                 .padding(20)
-                .background(Theme.bg)
+                .background(Color(.systemBackground))
             }
             .navigationTitle("Placer \(device.name)")
             .navigationBarTitleDisplayMode(.inline)

@@ -1,62 +1,55 @@
 import SwiftUI
 
+/// Toutes les odeurs que le nez connaît.
 struct LibraryView: View {
     @Environment(AppStore.self) private var store
-    @State private var editing: Odor?
     @State private var creating = false
+    @State private var search = ""
 
-    private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
+    private var filtered: [Odor] {
+        search.isEmpty ? store.odors : store.odors.filter { $0.name.localizedCaseInsensitiveContains(search) }
+    }
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                GlowBackground(colors: [Theme.gold, Theme.rose, Theme.lilac])
-                ScrollView {
-                    VStack(spacing: 18) {
-                        HStack(alignment: .bottom) {
-                            PageHeader(kicker: "\(store.odors.count) odeurs archivées", title: "Bibliothèque", color: Theme.gold)
-                            Button { creating = true } label: {
-                                Image(systemName: "plus").font(.system(size: 18, weight: .semibold)).frame(width: 44, height: 44)
-                                    .background(Circle().fill(Theme.gold.opacity(0.15)))
-                                    .overlay(Circle().stroke(Theme.gold.opacity(0.6)))
-                            }
-                        }
-                        LazyVGrid(columns: columns, spacing: 14) {
-                            ForEach(store.odors) { odor in
-                                NavigationLink(value: odor) { OdorCard(odor: odor) }.buttonStyle(.plain)
-                            }
-                        }
+            List {
+                Section {
+                    ForEach(filtered) { odor in
+                        NavigationLink(value: odor) { OdorRow(odor: odor) }
                     }
-                    .padding(20)
+                } footer: {
+                    Text("\(store.odors.count) odeurs. Touchez une odeur pour voir son empreinte et ses détections.")
                 }
-                .refreshable { await store.loadOdors() }
             }
+            .navigationTitle("Bibliothèque")
+            .searchable(text: $search, prompt: "Rechercher une odeur")
             .navigationDestination(for: Odor.self) { OdorDetailView(odorId: $0.id) }
+            .toolbar {
+                Button { creating = true } label: { Image(systemName: "plus") }
+                    .accessibilityLabel("Nouvelle odeur")
+            }
+            .refreshable { await store.loadOdors() }
             .sheet(isPresented: $creating) { OdorEditor(odor: nil) }
         }
     }
 }
 
-struct OdorCard: View {
+struct OdorRow: View {
     let odor: Odor
     var body: some View {
-        let color = Color(hex: odor.color)
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                OdorIcon(icon: odor.icon, color: color, size: 40)
-                Spacer()
-                if odor.alertLevel != "none" { LevelBadge(level: odor.alertLevel) }
+        HStack(spacing: 12) {
+            OdorIcon(icon: odor.icon, color: Color(hex: odor.color), size: 40)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(odor.name).font(.body.weight(.medium))
+                Text("\(odor.samples) échantillons · \(odor.detections) détections")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
-            Text(odor.name).font(.display(20)).foregroundStyle(Theme.ink).lineLimit(1).minimumScaleFactor(0.7)
-            RadarChart(fingerprint: odor.fingerprint, color: color, showLabels: false).frame(height: 90)
-            HStack {
-                Label("\(odor.samples)", systemImage: "square.stack.3d.up").font(.system(size: 11))
-                Spacer()
-                Label("\(odor.detections)", systemImage: "scope").font(.system(size: 11))
+            Spacer()
+            if odor.alertLevel != "none" {
+                Image(systemName: Theme.levelIcon(odor.alertLevel)).foregroundStyle(Theme.level(odor.alertLevel))
             }
-            .foregroundStyle(Theme.muted)
         }
-        .glass(padding: 14)
+        .padding(.vertical, 2)
     }
 }
 
@@ -70,54 +63,48 @@ struct OdorDetailView: View {
     var body: some View {
         if let odor = store.odor(odorId) {
             let color = Color(hex: odor.color)
-            ZStack {
-                GlowBackground(colors: [color, Theme.lilac, color])
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                        HStack(spacing: 16) {
-                            OdorIcon(icon: odor.icon, color: color, size: 72)
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text(odor.name).font(.display(34)).foregroundStyle(Theme.ink)
-                                LevelBadge(level: odor.alertLevel)
-                            }
-                        }
+            List {
+                Section {
+                    VStack(spacing: 8) {
+                        OdorIcon(icon: odor.icon, color: color, size: 72)
+                        Text(odor.name).font(.title2.bold())
+                        if odor.alertLevel != "none" { LevelBadge(level: odor.alertLevel) }
                         if let d = odor.description, !d.isEmpty {
-                            Text(d).font(.system(size: 15)).foregroundStyle(Theme.muted)
-                        }
-                        HStack(spacing: 12) {
-                            StatTile(value: "\(odor.samples)", label: "échantillons\nd'apprentissage", color: color)
-                            StatTile(value: "\(odor.detections)", label: "détections\nau total", color: Theme.gold)
-                        }
-                        VStack(alignment: .leading, spacing: 8) {
-                            Kicker("Empreinte moyenne", color: color)
-                            if odor.fingerprint.isEmpty {
-                                Text("Pas encore d'échantillon : enregistrez cette odeur dans l'onglet Apprendre.")
-                                    .font(.system(size: 13)).foregroundStyle(Theme.muted)
-                            }
-                            RadarChart(fingerprint: odor.fingerprint, color: color).frame(height: 260)
-                            ForEach(Channel.allCases) { ch in
-                                if let v = odor.fingerprint[ch.rawValue], abs(v) > 0.0001 {
-                                    HStack {
-                                        Text(ch.label).font(.system(size: 13)).foregroundStyle(Theme.ink)
-                                        Spacer()
-                                        Text(String(format: "%+.0f %%", v * 100)).font(.system(size: 13).monospacedDigit())
-                                            .foregroundStyle(v >= 0 ? Theme.ember : Theme.sky)
-                                    }
-                                }
-                            }
-                        }
-                        .glass(padding: 18)
-                        if let last = odor.lastDetected {
-                            Label("Dernière détection \(last.relative)", systemImage: "clock").font(.system(size: 13)).foregroundStyle(Theme.muted)
-                        }
-                        if !odor.isAir {
-                            Button("Supprimer cette odeur", role: .destructive) { confirmDelete = true }
-                                .buttonStyle(GhostButtonStyle(color: Theme.ember))
+                            Text(d).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
                         }
                     }
-                    .padding(20)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                Section("Chiffres") {
+                    LabeledContent("Échantillons d'apprentissage", value: "\(odor.samples)")
+                    LabeledContent("Détections", value: "\(odor.detections)")
+                    if let last = odor.lastDetected { LabeledContent("Dernière détection", value: last.relative) }
+                    LabeledContent("Alerte", value: Theme.levelName(odor.alertLevel))
+                }
+                Section {
+                    if odor.fingerprint.isEmpty {
+                        Text("Pas encore d'échantillon : enregistrez cette odeur dans l'onglet Apprendre.")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        RadarChart(fingerprint: odor.fingerprint, color: color).frame(height: 240).padding(.vertical, 8)
+                        NavigationLink("Valeurs détaillées") {
+                            FingerprintView(fingerprint: odor.fingerprint, color: color, title: odor.name)
+                        }
+                    }
+                } header: {
+                    Text("Empreinte moyenne")
+                } footer: {
+                    Text("La « signature » de cette odeur : comment chaque capteur réagit en moyenne.")
+                }
+                if !odor.isAir {
+                    Section {
+                        Button("Supprimer cette odeur", role: .destructive) { confirmDelete = true }
+                    }
                 }
             }
+            .navigationTitle(odor.name)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar { Button("Modifier") { editing = true } }
             .sheet(isPresented: $editing) { OdorEditor(odor: odor) }
             .confirmationDialog("Supprimer « \(odor.name) » et ses échantillons ?", isPresented: $confirmDelete, titleVisibility: .visible) {
@@ -126,7 +113,7 @@ struct OdorDetailView: View {
                 }
             }
         } else {
-            Text("Odeur introuvable").foregroundStyle(Theme.muted)
+            ContentUnavailableView("Odeur introuvable", systemImage: "questionmark")
         }
     }
 }
@@ -139,7 +126,7 @@ struct OdorEditor: View {
 
     @State private var name = ""
     @State private var icon = "👃"
-    @State private var color = Theme.lilac
+    @State private var color = Color.indigo
     @State private var level = "none"
     @State private var details = ""
     @State private var saving = false
@@ -147,23 +134,26 @@ struct OdorEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Odeur") {
+                Section {
                     TextField("Nom (ex. Lavande)", text: $name)
                     TextField("Emoji", text: $icon)
                     ColorPicker("Couleur", selection: $color, supportsOpacity: false)
+                } header: {
+                    Text("Odeur")
                 }
-                Section("Alerte quand elle est détectée") {
+                Section {
                     Picker("Niveau", selection: $level) {
                         ForEach(["none", "info", "warning", "danger"], id: \.self) { Text(Theme.levelName($0)).tag($0) }
                     }
-                    .pickerStyle(.segmented)
+                } header: {
+                    Text("Alerte")
+                } footer: {
+                    Text("Quand cette odeur est détectée, une alerte de ce niveau est envoyée.")
                 }
                 Section("Description") {
                     TextField("Optionnel", text: $details, axis: .vertical).lineLimit(2...5)
                 }
             }
-            .scrollContentBackground(.hidden)
-            .background(GlowBackground(colors: [color, Theme.lilac, Theme.gold]))
             .navigationTitle(odor == nil ? "Nouvelle odeur" : "Modifier")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

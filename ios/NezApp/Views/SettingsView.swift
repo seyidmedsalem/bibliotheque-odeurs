@@ -7,48 +7,51 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section("Appareils") {
+            Form {
+                Section {
                     if store.devices.isEmpty {
-                        Text("Aucun appareil pour l'instant.").foregroundStyle(Theme.muted)
+                        Text("Aucun appareil pour l'instant.").foregroundStyle(.secondary)
                     }
                     ForEach(store.devices) { d in
                         NavigationLink { DeviceEditor(device: d) } label: {
                             HStack(spacing: 12) {
-                                GlowDot(color: d.online ? Theme.mint : Theme.muted, size: 8)
+                                Image(systemName: "sensor.fill")
+                                    .foregroundStyle(d.online ? .green : .secondary)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(d.name).foregroundStyle(Theme.ink)
+                                    Text(d.name)
                                     Text([d.room, d.online ? stateName(d.state) : (d.lastSeen.map { "vu \($0.relative)" } ?? "jamais vu")]
                                         .compactMap { $0 }.joined(separator: " · "))
-                                        .font(.system(size: 12)).foregroundStyle(Theme.muted)
+                                        .font(.footnote).foregroundStyle(.secondary)
                                 }
                             }
                         }
                     }
+                } header: {
+                    Text("Appareils")
+                } footer: {
+                    Text("Touchez un nez pour le renommer, lui donner une pièce, le placer sur la carte ou le calibrer.")
                 }
                 Section("Serveur") {
                     LabeledContent("Adresse", value: store.serverURL)
-                    LabeledContent("Temps réel", value: store.liveConnected ? "connecté" : "déconnecté")
-                    LabeledContent("Broker MQTT", value: store.health?.mqttConnected == true ? "connecté" : "non connecté")
-                    LabeledContent("Modèle", value: store.health?.modelTrained == true ? "entraîné" : "non entraîné")
+                    LabeledContent("Temps réel", value: store.liveConnected ? "Connecté" : "Déconnecté")
+                    LabeledContent("Capteurs (MQTT)", value: store.health?.mqttConnected == true ? "Connecté" : "Non connecté")
+                    LabeledContent("Modèle", value: store.health?.modelTrained == true ? "Entraîné" : "Non entraîné")
                 }
                 Section {
                     Button("Se déconnecter", role: .destructive) { store.logout(); dismiss() }
                 }
                 Section {
-                    VStack(spacing: 4) {
-                        Text("La bibliothèque des odeurs").font(.display(18)).foregroundStyle(Theme.ink)
-                        Text("Projet IoT de Seyid Cheikh").font(.system(size: 12)).foregroundStyle(Theme.gold)
+                    VStack(spacing: 2) {
+                        Text("La bibliothèque des odeurs").font(.footnote.weight(.semibold))
+                        Text("Projet IoT de Seyid Cheikh").font(.footnote).foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity)
                     .listRowBackground(Color.clear)
                 }
             }
-            .scrollContentBackground(.hidden)
-            .background(GlowBackground())
             .navigationTitle("Réglages")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { Button("OK") { dismiss() } }
+            .toolbar { Button("OK") { dismiss() }.bold() }
             .task { await store.loadHealth(); await store.loadDevices() }
         }
     }
@@ -56,7 +59,7 @@ struct SettingsView: View {
     private func stateName(_ s: String) -> String {
         switch s {
         case "online": return "en ligne"
-        case "warming": return "en chauffe"
+        case "warming": return "préchauffage"
         default: return s
         }
     }
@@ -89,29 +92,28 @@ struct DeviceEditor: View {
                 if let lat = current.lat, let lon = current.lon {
                     LabeledContent("Position", value: String(format: "%.5f, %.5f", lat, lon))
                 } else {
-                    Text("Pas encore de position réelle").foregroundStyle(Theme.ember)
+                    Label("Pas encore de position", systemImage: "mappin.slash").foregroundStyle(.orange)
                 }
-                Button { placing = true } label: { Label("Placer sur la carte / par GPS", systemImage: "mappin.and.ellipse") }
-                Toggle(isOn: following) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Suivre la position de ce téléphone")
-                        Text("Pour cartographier un quartier en marchant avec le nez.").font(.system(size: 11)).foregroundStyle(Theme.muted)
-                    }
-                }
+                Button { placing = true } label: { Label("Placer sur la carte", systemImage: "mappin.and.ellipse") }
+                Toggle("Suivre ma position", isOn: following)
             } header: {
-                Text("Position réelle (carte olfactive)")
+                Text("Position")
+            } footer: {
+                Text("« Suivre ma position » met à jour la position du nez pendant que vous marchez avec, pour cartographier un quartier.")
             }
-            Section("Actions") {
-                Button("Calibrer à l'air propre") {
-                    Task { await store.calibrate(device.id); info = "Calibration demandée : laissez le nez à l'air propre ~10 s." }
-                }
-                Button("Faire clignoter l'appareil") { Task { await store.identify(device.id) } }
-                if let info { Text(info).font(.system(size: 12)).foregroundStyle(Theme.muted) }
+            Section {
+                Button {
+                    Task { await store.calibrate(device.id); info = "Calibration demandée : laissez le nez à l'air propre environ 10 secondes." }
+                } label: { Label("Calibrer à l'air propre", systemImage: "wind") }
+                Button { Task { await store.identify(device.id) } } label: { Label("Faire clignoter le nez", systemImage: "lightbulb") }
+            } header: {
+                Text("Actions")
+            } footer: {
+                if let info { Text(info) }
             }
         }
-        .scrollContentBackground(.hidden)
-        .background(GlowBackground())
         .navigationTitle(device.name)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             Button("Enregistrer") {
                 Task {
@@ -119,6 +121,7 @@ struct DeviceEditor: View {
                     dismiss()
                 }
             }
+            .bold()
         }
         .sheet(isPresented: $placing) { PlaceDeviceView(device: current) }
         .onAppear {
