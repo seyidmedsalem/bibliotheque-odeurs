@@ -3,7 +3,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Too
 import { CHANNELS, parseDate, relative } from "../api";
 import {
   ConfidenceRing, DevicePicker, Empty, GlowBackground, GlowDot, Kicker, LevelBadge, OdorIcon, PageHeader,
-  ProbabilityBar, Radar, StatTile, accent,
+  ProbabilityBar, Radar, StatTile,
 } from "../components/ui";
 import { useStore } from "../store";
 
@@ -16,14 +16,14 @@ export default function Dashboard() {
   const dev = s.selected;
   const p = dev ? s.predictions[dev.id] : undefined;
   const points = dev ? s.readings[dev.id] ?? [] : [];
-  const color = p?.color ?? "#A79FB5";
+  const color = p?.color ?? "#8E8E93";
   const last = points[points.length - 1];
   const ch = CHANNELS.find((c) => c.key === channel)!;
   const series = points.filter((r) => r.data[channel] !== undefined).map((r) => ({ t: time(r.ts), v: r.data[channel] }));
 
   return (
     <>
-      <GlowBackground colors={[color, "#A98BFF", "#6FE3C1"]} />
+      <GlowBackground colors={[color, "var(--lilac)", "var(--mint)"]} />
       <PageHeader kicker="En direct" title="Le nez" color="var(--mint)"><DevicePicker /></PageHeader>
 
       {!s.devices.length ? (
@@ -90,7 +90,7 @@ export default function Dashboard() {
               </div>
               <div className="row wrap" style={{ gap: 6 }}>
                 {CHANNELS.map((c) => (
-                  <button key={c.key} className="ghost" style={accent(c.key === channel ? "#6CB8FF" : "#A79FB5")} onClick={() => setChannel(c.key)}>{c.label}</button>
+                  <button key={c.key} className={`chip${c.key === channel ? " active" : ""}`} onClick={() => setChannel(c.key)}>{c.label}</button>
                 ))}
               </div>
               <div style={{ height: 230 }}>
@@ -99,14 +99,14 @@ export default function Dashboard() {
                     <AreaChart data={series} margin={{ top: 8, right: 4, left: -8, bottom: 0 }}>
                       <defs>
                         <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#6CB8FF" stopOpacity={0.4} /><stop offset="100%" stopColor="#6CB8FF" stopOpacity={0} />
+                          <stop offset="0%" stopColor="var(--sky)" stopOpacity={0.4} /><stop offset="100%" stopColor="var(--sky)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
-                      <XAxis dataKey="t" tick={{ fill: "#A79FB5", fontSize: 11 }} minTickGap={40} stroke="transparent" />
-                      <YAxis tick={{ fill: "#A79FB5", fontSize: 11 }} domain={["auto", "auto"]} stroke="transparent" width={56} tickFormatter={fmt} />
-                      <Tooltip contentStyle={{ background: "#171124", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }} formatter={(v: number) => [`${fmt(v)} ${ch.unit}`, ch.label]} />
-                      <Area type="monotone" dataKey="v" stroke="#6CB8FF" strokeWidth={2} fill="url(#g)" isAnimationActive={false} />
+                      <CartesianGrid stroke="var(--hair)" vertical={false} />
+                      <XAxis dataKey="t" tick={{ fill: "var(--muted)", fontSize: 11 }} minTickGap={40} stroke="transparent" />
+                      <YAxis tick={{ fill: "var(--muted)", fontSize: 11 }} domain={["auto", "auto"]} stroke="transparent" width={56} tickFormatter={fmt} />
+                      <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }} formatter={(v: number) => [`${fmt(v)} ${ch.unit}`, ch.label]} />
+                      <Area type="monotone" dataKey="v" stroke="var(--sky)" strokeWidth={2} fill="url(#g)" isAnimationActive={false} />
                     </AreaChart>
                   </ResponsiveContainer>
                 )}
@@ -120,10 +120,10 @@ export default function Dashboard() {
               <div style={{ height: 170, marginTop: 12 }}>
                 <ResponsiveContainer>
                   <BarChart data={s.stats.timeline} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
-                    <XAxis dataKey="hour" tick={{ fill: "#A79FB5", fontSize: 11 }} interval={2} stroke="transparent" />
-                    <YAxis allowDecimals={false} tick={{ fill: "#A79FB5", fontSize: 11 }} stroke="transparent" />
-                    <Tooltip cursor={{ fill: "rgba(255,255,255,0.04)" }} contentStyle={{ background: "#171124", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }} />
-                    <Bar dataKey="count" name="détections" fill="#F27BA0" radius={[4, 4, 0, 0]} />
+                    <XAxis dataKey="hour" tick={{ fill: "var(--muted)", fontSize: 11 }} interval={2} stroke="transparent" />
+                    <YAxis allowDecimals={false} tick={{ fill: "var(--muted)", fontSize: 11 }} stroke="transparent" />
+                    <Tooltip cursor={{ fill: "var(--fill)" }} contentStyle={{ background: "var(--card)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }} />
+                    <Bar dataKey="count" name="détections" fill="var(--rose)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

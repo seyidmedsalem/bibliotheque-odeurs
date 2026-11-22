@@ -22,12 +22,12 @@ export default function Learn() {
 
   const session = s.session;
   const sOdor = s.odor(session?.odor_id);
-  const sColor = sOdor?.color ?? "#F27BA0";
+  const sColor = sOdor?.color ?? "var(--rose)";
   const meta = s.model?.meta ?? {};
 
   return (
     <>
-      <GlowBackground colors={["#A98BFF", "#F27BA0", "#E8C27A"]} />
+      <GlowBackground colors={["var(--lilac)", "var(--rose)", "var(--gold)"]} />
       <PageHeader kicker="Mode apprentissage" title="Apprendre" color="var(--lilac)"><DevicePicker /></PageHeader>
 
       <div className="grid grid-2">
@@ -48,12 +48,12 @@ export default function Learn() {
               <div className="row" style={{ gap: 16 }}>
                 <OdorIcon icon={sOdor?.icon ?? "👃"} color={sColor} size={66} />
                 <div>
-                  <div className="display" style={{ fontSize: 32 }}>{sOdor?.name}</div>
+                  <div className="display" style={{ fontSize: 30 }}>{sOdor?.name}</div>
                   <div className="muted small">{session.collected === 0 ? "Montée de l'odeur… présentez-la maintenant" : `${session.collected} / ${session.target_windows} échantillons`}</div>
                 </div>
               </div>
-              <div className="bar" style={{ height: 10 }}><div style={{ width: `${(session.collected / session.target_windows) * 100}%`, background: sColor, boxShadow: `0 0 10px ${sColor}` }} /></div>
-              <div><button className="ghost" style={accent("#FF8A5B")} onClick={s.cancelTraining}>Annuler</button></div>
+              <div className="bar" style={{ height: 10 }}><div style={{ width: `${(session.collected / session.target_windows) * 100}%`, background: sColor }} /></div>
+              <div><button className="ghost" style={accent("var(--ember)")} onClick={s.cancelTraining}>Annuler</button></div>
             </div>
           ) : (
             <div className="glass stack" style={{ gap: 14 }}>
@@ -66,13 +66,13 @@ export default function Learn() {
               </div>
               <div>
                 <label className="lbl">{windows} échantillons · ≈ {windows * 5 + 20} s de mesure</label>
-                <input type="range" min={3} max={40} value={windows} onChange={(e) => setWindows(Number(e.target.value))} style={{ width: "100%", accentColor: "#F27BA0" }} />
+                <input type="range" min={3} max={40} value={windows} onChange={(e) => setWindows(Number(e.target.value))} style={{ width: "100%", accentColor: "var(--rose)" }} />
               </div>
               {s.selected && !s.selected.calibrated && <div className="error">Appareil pas encore calibré : patientez quelques secondes.</div>}
               {session?.status === "done" && (
                 <div className="small" style={{ color: "var(--mint)" }}>✓ {sOdor?.name} enregistrée ({session.collected} échantillons). Pensez à réentraîner le modèle.</div>
               )}
-              <button className="btn" style={accent("#F27BA0")} disabled={!odorId || !s.selected}
+              <button className="btn" disabled={!odorId || !s.selected}
                 onClick={() => s.selected && odorId && s.startTraining(s.selected.id, odorId, windows)}>
                 Démarrer l'enregistrement
               </button>
@@ -88,7 +88,7 @@ export default function Learn() {
           </div>
           {meta.accuracy !== undefined && (
             <div className="row" style={{ alignItems: "baseline", gap: 12 }}>
-              <span className="display" style={{ fontSize: 60, color: "var(--mint)", lineHeight: 1 }}>{Math.round(meta.accuracy * 100)} %</span>
+              <span className="display" style={{ fontSize: 30, color: "var(--mint)", lineHeight: 1 }}>{Math.round(meta.accuracy * 100)} %</span>
               <span className="muted small">de précision<br />(validation croisée, {meta.n_samples} échantillons)</span>
             </div>
           )}
@@ -119,7 +119,7 @@ export default function Learn() {
                         <td title={meta.classes![i].name}>{s.odor(meta.classes![i].odor_id)?.icon ?? "?"}</td>
                         {row.map((v, j) => (
                           <td key={j} style={{
-                            background: `color-mix(in srgb, ${i === j ? "#6FE3C1" : "#FF8A5B"} ${v ? 15 + 60 * (v / max) : 4}%, transparent)`,
+                            background: `color-mix(in srgb, ${i === j ? "var(--mint)" : "var(--ember)"} ${v ? 15 + 60 * (v / max) : 4}%, transparent)`,
                             color: v ? "var(--ink)" : "rgba(167,159,181,0.5)",
                           }}>{v}</td>
                         ))}
@@ -144,7 +144,7 @@ export default function Learn() {
           )}
 
           {trainError && <div className="error">{trainError}</div>}
-          <button className="btn" style={accent("#6FE3C1")} disabled={training}
+          <button className="btn" style={accent("var(--mint)")} disabled={training}
             onClick={async () => { setTraining(true); setTrainError(await s.trainModel()); setTraining(false); }}>
             {training ? "Entraînement…" : "Entraîner le modèle"}
           </button>

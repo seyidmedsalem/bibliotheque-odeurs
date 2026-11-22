@@ -107,8 +107,8 @@ export function relative(s: string | null): string {
 }
 
 export const LEVELS: Record<string, { name: string; color: string }> = {
-  none: { name: "Aucune", color: "#6FE3C1" },
-  info: { name: "Info", color: "#6CB8FF" },
-  warning: { name: "Attention", color: "#FF8A5B" },
-  danger: { name: "Danger", color: "#F25C54" },
+  none: { name: "Aucune", color: "#34C759" },
+  info: { name: "Info", color: "#007AFF" },
+  warning: { name: "Attention", color: "#FF9500" },
+  danger: { name: "Danger", color: "#FF3B30" },
 };

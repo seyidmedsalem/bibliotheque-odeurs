@@ -12,7 +12,7 @@ export default function Devices() {
 
   return (
     <>
-      <GlowBackground colors={["#6CB8FF", "#A98BFF", "#6FE3C1"]} />
+      <GlowBackground colors={["var(--sky)", "var(--lilac)", "var(--mint)"]} />
       <PageHeader kicker={`${s.devices.filter((d) => d.online).length} en ligne`} title="Appareils" color="var(--sky)">
         <button className="ghost" onClick={s.logout}>Se déconnecter</button>
       </PageHeader>
@@ -81,7 +81,7 @@ function DeviceCard({ device }: { device: Device }) {
       </div>
       <div className="row wrap">
         <button className="btn" disabled={!dirty} onClick={() => s.updateDevice(device.id, { name, room: room || null })}>Enregistrer</button>
-        <button className="ghost" style={accent("#6CB8FF")} onClick={async () => { await s.calibrate(device.id); setInfo("Calibration demandée : laissez le nez à l'air propre ~10 s."); }}>Calibrer à l'air propre</button>
+        <button className="ghost" style={accent("var(--sky)")} onClick={async () => { await s.calibrate(device.id); setInfo("Calibration demandée : laissez le nez à l'air propre ~10 s."); }}>Calibrer à l'air propre</button>
         <button className="ghost" onClick={() => s.identify(device.id)}>Faire clignoter</button>
       </div>
       {info && <div className="muted small">{info}</div>}

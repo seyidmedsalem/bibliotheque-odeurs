@@ -10,7 +10,7 @@ export default function Alerts() {
 
   return (
     <>
-      <GlowBackground colors={["#FF8A5B", "#F27BA0", "#A98BFF"]} />
+      <GlowBackground colors={["var(--ember)", "var(--rose)", "var(--lilac)"]} />
       <PageHeader kicker={`${s.unread} non lues`} title="Alertes" color="var(--ember)">
         <button className={`chip${!onlyUnread ? " active" : ""}`} onClick={() => setOnlyUnread(false)}>Toutes</button>
         <button className={`chip${onlyUnread ? " active" : ""}`} onClick={() => setOnlyUnread(true)}>Non lues</button>
@@ -23,7 +23,7 @@ export default function Alerts() {
           const color = LEVELS[a.level]?.color ?? "var(--gold)";
           return (
             <div key={a.id} className="glass row" style={{ alignItems: "stretch", gap: 16, opacity: a.acknowledged ? 0.55 : 1 }}>
-              <div style={{ width: 4, borderRadius: 2, background: color, boxShadow: `0 0 8px ${color}` }} />
+              <div style={{ width: 4, borderRadius: 2, background: color }} />
               <div style={{ flex: 1 }} className="stack">
                 <div className="row between" style={{ marginBottom: -10 }}>
                   <LevelBadge level={a.level} /><span className="muted small">{relative(a.ts)}</span>

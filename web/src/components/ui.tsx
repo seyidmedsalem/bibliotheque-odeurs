@@ -16,7 +16,7 @@ export function PageHeader({ kicker, title, color = "var(--gold)", children }: {
   return (
     <div className="page-header">
       <div>
-        <div className="kicker" style={{ color }}>{kicker}</div>
+        <div className="kicker">{kicker}</div>
         <h1>{title}</h1>
         <div className="rule" style={{ background: color }} />
       </div>
@@ -26,25 +26,26 @@ export function PageHeader({ kicker, title, color = "var(--gold)", children }: {
 }
 
 export function Kicker({ children, color = "var(--gold)" }: { children: ReactNode; color?: string }) {
-  return <div className="kicker" style={{ color }}>{children}</div>;
+  void color;
+  return <div className="kicker">{children}</div>;
 }
 
 export function GlowDot({ color, size = 9 }: { color: string; size?: number }) {
-  return <span className="dot" style={{ background: color, width: size, height: size, boxShadow: `0 0 ${size}px ${color}` }} />;
+  return <span className="dot" style={{ background: color, width: size, height: size }} />;
 }
 
 export function OdorIcon({ icon, color, size = 44 }: { icon: string; color: string; size?: number }) {
   return (
     <div className="odor-icon" style={{
-      width: size, height: size, fontSize: size * 0.48, background: `${color}2e`,
-      border: `1px solid ${color}b3`, boxShadow: `0 0 ${size * 0.35}px ${color}88`,
+      width: size, height: size, fontSize: size * 0.5,
+      background: `color-mix(in srgb, ${color} 18%, transparent)`,
     }}>{icon}</div>
   );
 }
 
 export function LevelBadge({ level }: { level: string }) {
   const l = LEVELS[level] ?? LEVELS.none;
-  return <span className="level" style={{ color: l.color, background: `${l.color}24` }}>{l.name}</span>;
+  return <span className="level" style={{ color: l.color, background: `color-mix(in srgb, ${l.color} 14%, transparent)` }}>{l.name}</span>;
 }
 
 export function ProbabilityBar({ label, value, color }: { label: string; value: number; color: string }) {
@@ -54,7 +55,7 @@ export function ProbabilityBar({ label, value, color }: { label: string; value: 
         <span style={{ fontSize: 14 }}>{label}</span>
         <span className="muted small" style={{ fontVariantNumeric: "tabular-nums" }}>{Math.round(value * 100)} %</span>
       </div>
-      <div className="bar"><div style={{ width: `${Math.max(1, value * 100)}%`, background: color, boxShadow: `0 0 8px ${color}` }} /></div>
+      <div className="bar"><div style={{ width: `${Math.max(1, value * 100)}%`, background: color }} /></div>
     </div>
   );
 }
@@ -75,9 +76,9 @@ export function ConfidenceRing({ value, color, size = 84 }: { value: number; col
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--hair)" strokeWidth="6" />
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round"
         strokeDasharray={`${c * value} ${c}`} transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        style={{ transition: "stroke-dasharray 0.6s ease", filter: `drop-shadow(0 0 5px ${color})` }} />
+        style={{ transition: "stroke-dasharray 0.6s ease" }} />
       <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" fill="var(--ink)"
-        style={{ fontFamily: "var(--serif)", fontStyle: "italic", fontSize: size * 0.32 }}>{Math.round(value * 100)}</text>
+        style={{ fontWeight: 700, fontSize: size * 0.3 }}>{Math.round(value * 100)}</text>
       <text x="50%" y="74%" textAnchor="middle" fill="var(--muted)" fontSize="10">%</text>
     </svg>
   );
@@ -98,8 +99,8 @@ export function Radar({ fingerprint, color, size = 260, labels = true }: { finge
     <svg viewBox={`0 0 ${size} ${size}`} width="100%" style={{ maxWidth: size, display: "block", margin: "0 auto" }}>
       {[1, 2, 3].map((k) => <polygon key={k} points={poly(Array(n).fill(k / 3))} fill="none" stroke="var(--hair)" />)}
       {CHANNELS.map((_, i) => { const [x, y] = pt(i, 1); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="var(--hair)" />; })}
-      <polygon points={poly(vals)} fill={`${color}40`} stroke={color} strokeWidth="1.8"
-        style={{ filter: `drop-shadow(0 0 6px ${color})`, transition: "all 0.6s ease" }} />
+      <polygon points={poly(vals)} fill={color} fillOpacity={0.2} stroke={color} strokeWidth="2"
+        style={{ transition: "all 0.6s ease" }} />
       {labels && CHANNELS.map((c, i) => {
         const [x, y] = pt(i, 1.24);
         return <text key={c.key} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="var(--muted)" fontSize="11">{c.label}</text>;
@@ -111,7 +112,7 @@ export function Radar({ fingerprint, color, size = 260, labels = true }: { finge
 export function Empty({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="glass empty">
-      <div className="display" style={{ fontSize: 26, marginBottom: 8 }}>{title}</div>
+      <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>{title}</div>
       <div className="muted">{children}</div>
     </div>
   );

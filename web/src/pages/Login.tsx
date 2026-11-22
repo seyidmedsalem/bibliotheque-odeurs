@@ -18,11 +18,11 @@ export default function Login() {
 
   return (
     <div style={{ minHeight: "100%", display: "grid", placeItems: "center", padding: 24 }}>
-      <GlowBackground colors={["#F27BA0", "#A98BFF", "#6FE3C1"]} />
+      <GlowBackground colors={["var(--rose)", "var(--lilac)", "var(--mint)"]} />
       <form onSubmit={submit} style={{ width: "min(440px, 100%)" }} className="stack">
         <div>
           <div className="kicker">Projet IoT · Nez électronique</div>
-          <h1 className="display" style={{ fontSize: 58, lineHeight: 1, margin: "14px 0 14px", fontWeight: 400 }}>
+          <h1 className="display" style={{ fontSize: 30, lineHeight: 1, margin: "14px 0 14px", fontWeight: 400 }}>
             La bibliothèque<br />des odeurs
           </h1>
           <div style={{ width: 64, height: 1.5, background: "var(--gold)" }} />

@@ -11,7 +11,7 @@ export default function Library() {
 
   return (
     <>
-      <GlowBackground colors={["#E8C27A", "#F27BA0", "#A98BFF"]} />
+      <GlowBackground colors={["var(--gold)", "var(--rose)", "var(--lilac)"]} />
       <PageHeader kicker={`${s.odors.length} odeurs archivées`} title="Bibliothèque">
         <button className="btn" onClick={() => setCreating(true)}>+ Nouvelle odeur</button>
       </PageHeader>
@@ -46,7 +46,7 @@ function OdorDetail({ odor, onClose }: { odor: Odor; onClose: () => void }) {
         <div className="row" style={{ gap: 16 }}>
           <OdorIcon icon={odor.icon} color={odor.color} size={72} />
           <div style={{ flex: 1 }}>
-            <div className="display" style={{ fontSize: 36 }}>{odor.name}</div>
+            <div className="display" style={{ fontSize: 30 }}>{odor.name}</div>
             <LevelBadge level={odor.alert_level} />
           </div>
           <button className="icon-btn" onClick={onClose}>×</button>
@@ -74,7 +74,7 @@ function OdorDetail({ odor, onClose }: { odor: Odor; onClose: () => void }) {
         <div className="row">
           <button className="btn" style={accent(odor.color)} onClick={() => setEditing(true)}>Modifier</button>
           {!odor.is_air && (
-            <button className="ghost" style={accent("#FF8A5B")} onClick={() => {
+            <button className="ghost" style={accent("var(--ember)")} onClick={() => {
               if (confirm(`Supprimer « ${odor.name} » et ses échantillons ?`)) { s.deleteOdor(odor.id); onClose(); }
             }}>Supprimer</button>
           )}
@@ -88,7 +88,7 @@ export function OdorEditor({ odor, onClose }: { odor?: Odor; onClose: () => void
   const s = useStore();
   const [name, setName] = useState(odor?.name ?? "");
   const [icon, setIcon] = useState(odor?.icon ?? "👃");
-  const [color, setColor] = useState(odor?.color ?? "#A98BFF");
+  const [color, setColor] = useState(odor?.color ?? "var(--lilac)");
   const [level, setLevel] = useState(odor?.alert_level ?? "none");
   const [description, setDescription] = useState(odor?.description ?? "");
   const [saving, setSaving] = useState(false);
@@ -103,7 +103,7 @@ export function OdorEditor({ odor, onClose }: { odor?: Odor; onClose: () => void
   return (
     <Modal onClose={onClose}>
       <div className="stack">
-        <div className="display" style={{ fontSize: 32 }}>{odor ? "Modifier l'odeur" : "Nouvelle odeur"}</div>
+        <div className="display" style={{ fontSize: 30 }}>{odor ? "Modifier l'odeur" : "Nouvelle odeur"}</div>
         <div className="row" style={{ alignItems: "flex-end" }}>
           <div style={{ width: 80 }}><label className="lbl">Emoji</label><input className="input-box" value={icon} onChange={(e) => setIcon(e.target.value)} style={{ textAlign: "center", fontSize: 20 }} /></div>
           <div style={{ flex: 1 }}><label className="lbl">Nom</label><input className="input-box" placeholder="ex. Lavande" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></div>

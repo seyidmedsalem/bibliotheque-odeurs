@@ -46,7 +46,7 @@ function spotIcon(icon: string, color: string, count: number, selected: boolean)
 
 const deviceIcon = (online: boolean) => L.divIcon({
   className: "leaflet-div-icon clear", iconSize: [26, 26], iconAnchor: [13, -10],
-  html: `<div style="width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:${online ? "#6FE3C1" : "#A79FB5"};color:#100C18;font-size:13px">⌁</div>`,
+  html: `<div style="width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:${online ? "#34C759" : "#8E8E93"};color:#fff;font-size:13px">⌁</div>`,
 });
 
 export default function MapPage() {
@@ -110,7 +110,7 @@ export default function MapPage() {
             <TileLayer url={`${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`} maxZoom={20} maxNativeZoom={19} />
           </>
         ) : (
-          <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" maxZoom={20}
+          <TileLayer url={`https://{s}.basemaps.cartocdn.com/${window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark_all" : "voyager"}/{z}/{x}/{y}{r}.png`} maxZoom={20}
             attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/">CARTO</a>' />
         )}
         <ZoomControl position="bottomright" />
@@ -163,7 +163,7 @@ export default function MapPage() {
           {unplaced.length > 0 && !placing && (
             <div className="row wrap small" style={{ gap: 8, color: "var(--ember)" }}>
               ⚑ {unplaced.length} appareil(s) sans position réelle :
-              {unplaced.map((d) => <button key={d.id} className="ghost" style={accent("#FF8A5B")} onClick={() => startPlacing(d)}>Placer {d.name}</button>)}
+              {unplaced.map((d) => <button key={d.id} className="ghost" style={accent("var(--ember)")} onClick={() => startPlacing(d)}>Placer {d.name}</button>)}
             </div>
           )}
           {geoError && <div className="small muted">{geoError}</div>}
@@ -177,14 +177,14 @@ export default function MapPage() {
             <Kicker color="var(--mint)">Placer « {placing.name} »</Kicker>
             <div className="muted small">Cliquez sur la carte à l'endroit exact où se trouve le nez, ou utilisez votre position actuelle.</div>
             <div className="row wrap">
-              <button className="ghost" style={accent("#6CB8FF")} onClick={() => locate((p) => setPick(p))}>◉ Utiliser ma position</button>
+              <button className="ghost" style={accent("var(--sky)")} onClick={() => locate((p) => setPick(p))}>◉ Utiliser ma position</button>
               <label className="row small" style={{ gap: 6, cursor: "pointer" }}>
                 <input type="checkbox" checked={moveHistory} onChange={(e) => setMoveHistory(e.target.checked)} /> Déplacer aussi ses anciennes détections
               </label>
             </div>
             {pick && <div className="muted small" style={{ fontVariantNumeric: "tabular-nums" }}>{pick[0].toFixed(6)}, {pick[1].toFixed(6)}</div>}
             <div className="row">
-              <button className="btn" style={accent("#6FE3C1")} disabled={!pick} onClick={savePlace}>Enregistrer la position</button>
+              <button className="btn" style={accent("var(--mint)")} disabled={!pick} onClick={savePlace}>Enregistrer la position</button>
               <button className="ghost" onClick={() => { setPlacing(null); setPick(null); }}>Annuler</button>
             </div>
           </div>

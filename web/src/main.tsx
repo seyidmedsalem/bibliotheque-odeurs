@@ -61,7 +61,7 @@ function Shell() {
       </main>
       {s.banner && (
         <div className="banner" onClick={() => s.setBanner(null)}
-          style={{ border: `1px solid ${LEVELS[s.banner.level]?.color}`, boxShadow: `0 0 30px ${LEVELS[s.banner.level]?.color}66` }}>
+          style={{  boxShadow: "0 8px 30px rgba(0,0,0,0.18)" }}>
           <GlowDot color={LEVELS[s.banner.level]?.color ?? "var(--gold)"} size={12} />
           <div>
             <div style={{ fontWeight: 600 }}>{s.banner.title}</div>
