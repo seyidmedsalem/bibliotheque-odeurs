@@ -48,7 +48,7 @@ c.setTitle("La bibliothèque des odeurs - Nez électronique IoT")
 c.setAuthor(AUTEUR)
 c.setSubject("Présentation du projet IoT : matériel, backend, frontend, machine learning")
 state = {"page": 0}
-TOTAL = 15
+TOTAL = 17
 
 
 # ------------------------------------------------------------------ primitives
@@ -265,7 +265,7 @@ c.setFont("Di", 30)
 c.drawString(60, 76, AUTEUR)
 c.setFillColor(MUTED)
 c.setFont("Av", 10)
-c.drawString(60, 54, DATE + "   ·   ESP32  ·  MQTT  ·  FastAPI  ·  React  ·  Machine Learning")
+c.drawString(60, 54, DATE + "   ·   ESP32  ·  MQTT  ·  FastAPI  ·  SwiftUI  ·  React  ·  Machine Learning")
 
 # ================================================================== 02 Concept
 slide(2, "Pourquoi ce projet", "Le concept", ROSE)
@@ -306,8 +306,8 @@ N = {"cap": (110, 300, MINT, "Capteurs", "gaz + T/H"),
      "mq": (430, 300, GOLD, "Mosquitto", "broker MQTT"),
      "api": (600, 300, LILAC, "FastAPI", "API + ML"),
      "db": (540, 140, SKY, "PostgreSQL", "Timescale+PostGIS"),
-     "web": (790, 300, ROSE, "React", "dashboard"),
-     "al": (790, 140, EMBER, "Alertes", "web · Telegram")}
+     "web": (790, 300, ROSE, "Apps", "iPhone · Web"),
+     "al": (790, 140, EMBER, "Alertes", "apps · Telegram")}
 link(152, 300, 226, 300, "I2C / ADC")
 link(312, 300, 386, 300, "Wi-Fi MQTT")
 link(472, 300, 556, 300, "abonnement")
@@ -322,7 +322,7 @@ c.setFont("AvI", 9)
 c.drawString(582, 210, "stockage")
 para("<b>Flux :</b> les capteurs mesurent l'air, l'ESP32 publie les mesures en JSON via MQTT, "
      "le backend les stocke, calcule l'empreinte, prédit l'odeur puis pousse le résultat en temps réel "
-     "vers l'interface web. Tout le serveur tourne dans <b>Docker Compose</b>.", 48, 175, 400, small)
+     "vers l'<b>app iPhone</b> et l'<b>interface web</b>. Tout le serveur tourne dans <b>Docker Compose</b>.", 48, 175, 400, small)
 
 # ================================================================== 05 Matériel numérique
 slide(5, "Hardware · le cerveau", "Microcontrôleur & capteurs", MINT)
@@ -463,35 +463,68 @@ card(492, H - 260, 420, 215, "Règles d'or", [
     "Recalibrer et réentraîner contre la dérive",
 ], ROSE, small, 4)
 
-# ================================================================== 11 Frontend
-slide(11, "Interface", "L'application web", ROSE)
-table([["Techno", "Usage"],
-       ["React + Vite + TS", "Application rapide et typée"],
-       ["Tailwind CSS", "Design moderne, responsive"],
-       ["React Router", "Navigation"],
-       ["Recharts", "Courbes et radar d'empreinte"],
-       ["Leaflet", "Carte olfactive interactive"],
-       ["WebSocket", "Temps réel"]],
-      48, H - 135, [140, 210], ROSE)
-pages = [("Tableau de bord", "Courbes en direct, odeur et confiance", MINT),
-         ("Apprentissage", "Étiqueter une odeur en 60 s", GOLD),
-         ("Bibliothèque", "Empreinte radar et historique", LILAC),
-         ("Carte olfactive", "Détections sur carte ou plan", SKY),
-         ("Alertes", "Gaz, aliments, seuils perso", EMBER),
-         ("Appareils", "État, chauffe, calibration", ROSE)]
-for i, (t, d, col) in enumerate(pages):
-    x = 430 + (i % 2) * 245
-    y = H - 135 - (i // 2) * 118
-    glass(x, y, 232, 104, col)
-    c.setFillColor(INK)
-    c.setFont("AvB", 13.5)
-    c.drawString(x + 42, y - 31, t)
-    para(d, x + 20, y - 52, 195, small)
+def tiles(items, x0=430, top=H - 135, w=232, h=104, dy=118):
+    for i, (t, d, col) in enumerate(items):
+        x = x0 + (i % 2) * (w + 13)
+        y = top - (i // 2) * dy
+        glass(x, y, w, h, col)
+        c.setFillColor(INK)
+        c.setFont("AvB", 13.5)
+        c.drawString(x + 42, y - 31, t)
+        para(d, x + 20, y - 52, w - 37, small)
 
-# ================================================================== 12 Déploiement
-slide(12, "DevOps", "Déploiement & outils", SKY)
+
+# ================================================================== 11 App iPhone
+slide(11, "Interface mobile", "L'application iPhone", ROSE)
+h = table([["Techno", "Usage"],
+           ["Swift + SwiftUI", "Interface native, iOS 17+"],
+           ["Xcode", "Compiler et installer sur l'iPhone"],
+           ["Swift Charts", "Courbes des capteurs en direct"],
+           ["MapKit", "Carte satellite en relief"],
+           ["CoreLocation", "Position GPS du téléphone"],
+           ["WebSocket", "Odeurs et alertes en temps réel"]],
+          48, H - 135, [130, 220], ROSE)
+para("Testée sur un <b>iPhone 14 Pro Max</b> : l'app propose l'adresse du serveur "
+     "et se reconnecte toute seule.", 48, H - 155 - h, 350, small)
+tiles([("Direct", "Odeur reconnue, confiance, radar, courbes", MINT),
+       ("Apprendre", "Enregistrer une odeur, entraîner le modèle", GOLD),
+       ("Bibliothèque", "Empreintes, création, niveaux d'alerte", LILAC),
+       ("Carte", "Satellite réelle, GPS, détections par lieu", SKY),
+       ("Alertes", "Bandeau en direct, marquer comme lue", EMBER),
+       ("Réglages", "Appareils, calibration, position", ROSE)])
+
+# ================================================================== 12 Interface web
+slide(12, "Interface web", "Le site web", SKY)
+h = table([["Techno", "Usage"],
+           ["React + TypeScript", "Interface typée et rapide"],
+           ["Vite", "Serveur de développement, build"],
+           ["React Router", "Navigation entre les pages"],
+           ["Recharts", "Courbes et détections sur 24 h"],
+           ["Leaflet", "Carte satellite Esri ou plan OSM"],
+           ["nginx", "Sert le site en production"]],
+          48, H - 135, [130, 220], SKY)
+para("Mêmes données et même temps réel que l'app iPhone : les deux interfaces "
+     "parlent à la même API.", 48, H - 155 - h, 350, small)
+tiles([("Mêmes pages", "Direct, Apprendre, Bibliothèque, Carte, Alertes, Appareils", MINT),
+       ("Ordinateur et mobile", "Menu latéral, ou barre en bas sur téléphone", GOLD),
+       ("Même style", "Parfumerie nocturne, comme la présentation", LILAC),
+       ("En production", "Docker + nginx sur le port 8080", ROSE)])
+
+# ================================================================== 13 Carte réelle
+slide(13, "Géolocalisation", "La carte olfactive réelle", MINT)
+para("« Chaque odeur détectée est placée là où elle a été sentie, sur une vraie carte. »", 48, H - 135, 864, lead)
+tiles([("Vue satellite", "En relief sur iPhone (Apple Plans), Esri ou plan sombre sur le web", SKY),
+       ("Position GPS", "Le point bleu du téléphone ; la carte se centre sur vous", MINT),
+       ("Placer un appareil", "Toucher la carte ou utiliser le GPS à côté du nez", GOLD),
+       ("Suivre le téléphone", "Un nez porté en marchant cartographie le quartier", ROSE),
+       ("Par lieu", "Une bulle par endroit : odeur dominante + nombre", LILAC),
+       ("Historique corrigé", "Les anciennes détections suivent la vraie position", EMBER)],
+      x0=48, top=H - 195, w=422, h=86, dy=98)
+
+# ================================================================== 14 Déploiement
+slide(14, "DevOps", "Déploiement & outils", SKY)
 svc = [("mosquitto", "broker MQTT", GOLD), ("db", "PostgreSQL + Timescale + PostGIS", SKY),
-       ("backend", "FastAPI + modèle ML", LILAC), ("frontend", "React servi par Nginx", ROSE)]
+       ("backend", "FastAPI + modèle ML", LILAC), ("web", "Site React servi par nginx", ROSE)]
 glass(48, H - 135, 520, 200)
 spaced("docker compose up", 70, H - 160, font="AvB", size=9, color=SKY)
 for i, (n, d, col) in enumerate(svc):
@@ -509,8 +542,8 @@ card(592, H - 135, 320, 200, "Hébergement", [
     "<b>Raspberry Pi</b> à la maison, 24 h / 24",
     "<b>VPS</b> pour un accès Internet",
 ], MINT, small, 8)
-tools = ["VS Code + PlatformIO", "Git + GitHub", "Swagger / Postman", "MQTT Explorer",
-         "Simulateur de capteurs", "pytest", "Jupyter"]
+tools = ["VS Code + PlatformIO", "Xcode", "Git + GitHub", "Swagger", "MQTT Explorer",
+         "Simulateur de capteurs", "pytest"]
 spaced("Outils de développement", 48, 170, size=9, color=SKY)
 x = 48
 y = 132
@@ -531,7 +564,7 @@ for t in tools:
     x += w + 10
 
 # ================================================================== 13 Sécurité
-slide(13, "Points d'attention", "Fiabilité & sécurité", EMBER)
+slide(15, "Points d'attention", "Fiabilité & sécurité", EMBER)
 card(48, H - 140, 420, 230, "Fiabilité des mesures", [
     "Chambre de mesure fermée + ventilateur",
     "Toujours comparer à une <b>référence d'air propre</b>",
@@ -548,13 +581,13 @@ card(492, H - 140, 420, 230, "Sécurité", [
 ], EMBER, small, 10)
 
 # ================================================================== 14 Plan
-slide(14, "Étapes", "Plan de réalisation", MINT)
-phases = [("Firmware ESP32", "Capteurs, MQTT, mode apprentissage", MINT),
-          ("Backend", "MQTT, base, API REST, WebSocket", LILAC),
-          ("Machine learning", "Collecte, entraînement, prédiction", GOLD),
-          ("Frontend", "Dashboard, bibliothèque, carte", ROSE),
-          ("Déploiement", "Docker Compose, README, câblage", SKY),
-          ("Bonus TinyML", "Modèle exécuté sur l'ESP32", EMBER)]
+slide(16, "Où en est le projet", "Plan de réalisation", MINT)
+phases = [("Firmware ESP32", "Capteurs, MQTT, mode apprentissage", MINT, "Écrit · à tester"),
+          ("Backend", "MQTT, base, API REST, WebSocket", LILAC, "Terminé · testé"),
+          ("Machine learning", "Collecte, entraînement, prédiction", GOLD, "Terminé · testé"),
+          ("Interfaces", "App iPhone et site web", ROSE, "Terminé · sur l'iPhone"),
+          ("Déploiement", "Docker, documentation, GitHub", SKY, "Terminé · publié"),
+          ("Bonus TinyML", "Modèle exécuté sur l'ESP32", EMBER, "À venir")]
 # courbe ondulée façon trace d'odeur
 c.saveState()
 c.setStrokeColor(INK)
@@ -568,7 +601,7 @@ for (x0, y0), (x1, y1) in zip(pos, pos[1:]):
     p.curveTo(x0 + 75, y0, x1 - 75, y1, x1, y1)
 c.drawPath(p, stroke=1, fill=0)
 c.restoreState()
-for i, ((x, y), (t, d, col)) in enumerate(zip(pos, phases)):
+for i, ((x, y), (t, d, col, status)) in enumerate(zip(pos, phases)):
     glow(x, y, 48, col, 0.06, 10)
     c.setFillColor(BG)
     c.setStrokeColor(col)
@@ -581,18 +614,24 @@ for i, ((x, y), (t, d, col)) in enumerate(zip(pos, phases)):
     c.setFillColor(INK)
     c.setFont("AvB", 12.5)
     c.drawCentredString(x, ty, t)
-    para(d, x - 68, ty - 6, 136, ParagraphStyle("pp", parent=small, fontSize=9.5, leading=12.5, alignment=1))
+    hh = para(d, x - 68, ty - 6, 136, ParagraphStyle("pp", parent=small, fontSize=9.5, leading=12.5, alignment=1))
+    done = status.startswith("Terminé")
+    c.setFillColor(MINT if done else (GOLD if status.startswith("Écrit") else MUTED))
+    c.setFont("AvB", 9.5)
+    # au-dessus du nom pour les étapes du haut, sous la description pour celles du bas
+    c.drawCentredString(x, ty + 17 if i % 2 else ty - 20 - hh, status)
 
-# ================================================================== 15 Résumé
-slide(15, "Conclusion", "En résumé", GOLD)
+# ================================================================== 17 Résumé
+slide(17, "Conclusion", "En résumé", GOLD)
 summary = [("Matériel", "ESP32-S3 · BME688 · SGP41 · MQ-3 / MQ-4 / MQ-135 · ADS1115", MINT),
            ("Communication", "Wi-Fi · MQTT (Mosquitto) · JSON", GOLD),
            ("Backend", "Python · FastAPI · PostgreSQL · TimescaleDB · PostGIS · WebSocket · JWT", LILAC),
-           ("Machine learning", "scikit-learn · Pandas · NumPy · Edge Impulse / TFLite Micro", SKY),
-           ("Frontend", "React · Vite · TypeScript · Tailwind CSS · Recharts · Leaflet", ROSE),
-           ("Déploiement", "Docker Compose · Nginx · Raspberry Pi ou VPS · GitHub", EMBER)]
+           ("Machine learning", "scikit-learn · NumPy · Random Forest · validation croisée", SKY),
+           ("App iPhone", "Swift · SwiftUI · Swift Charts · MapKit · CoreLocation", ROSE),
+           ("Site web", "React · TypeScript · Vite · Recharts · Leaflet", LILAC),
+           ("Déploiement", "Docker Compose · nginx · Raspberry Pi ou VPS · GitHub", EMBER)]
 for i, (t, d, col) in enumerate(summary):
-    y = H - 150 - i * 50
+    y = H - 145 - i * 44
     c.setFillColor(col)
     c.circle(56, y + 4, 4, fill=1, stroke=0)
     c.setFillColor(col)
@@ -603,10 +642,13 @@ for i, (t, d, col) in enumerate(summary):
     c.drawString(250, y, d)
     c.setStrokeColor(HAIR)
     c.setLineWidth(0.6)
-    c.line(48, y - 18, 912, y - 18)
+    c.line(48, y - 16, 912, y - 16)
+c.setFillColor(MUTED)
+c.setFont("Av", 10.5)
+c.drawString(48, 60, "Code et documentation : github.com/seyidmedsalem/bibliotheque-odeurs")
 c.setFillColor(GOLD)
 c.setFont("DiI", 20)
-c.drawRightString(912, 60, "Merci  ·  " + AUTEUR)
+c.drawRightString(912, 56, "Merci  ·  " + AUTEUR)
 
 c.save()
 print("OK", OUT)
